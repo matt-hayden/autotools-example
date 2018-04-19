@@ -10,3 +10,9 @@ include_HEADERS=libfib.h
 bin_PROGRAMS=fib
 fib_SOURCES=fib.c
 fib_LDADD=libfib.la
+
+SUBDIRS =
+# Optional packages
+if HAVE_PYTHON
+SUBDIRS += pyfib
+endif

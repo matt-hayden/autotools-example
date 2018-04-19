@@ -32,6 +32,17 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_CHECK_FUNCS([pow sqrt])
 
+
+AM_PATH_PYTHON(,, [:])
+AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON" != :])
+
+if test "$PYTHON" != :
+then
+	AC_CONFIG_SUBDIRS([src/pyfib])
+fi
+
+
 AC_CONFIG_FILES([Makefile
-                 src/Makefile])
+                 src/Makefile
+                 src/pyfib/Makefile])
 AC_OUTPUT
