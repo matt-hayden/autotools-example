@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
+#define PHI		1.618033988749894848204586834365638117720309179805762862135L
 #define MAX_FI_INT64	93
 #define INIT_MEMO_LEN	100
 
