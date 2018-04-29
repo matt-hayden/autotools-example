@@ -1,41 +1,62 @@
 #include "libfib.h"
 
-static int libfib_ok = 0;
-static double phi, sr5;
-static int64_t phi_low_memo[MAX_FI_INT64+1];
-
+struct fib_memo_t {
+	size_t len;
+	int64_t *val;
+};
+static struct fib_memo_t fib_memo = { .len=INIT_MEMO_LEN };
 
 void
 libfib_init() {
-	sr5 = sqrt(5.L);
-	phi = (1+sr5)/2.;
-	phi_low_memo[0] = 0;
-	phi_low_memo[1] = 1;
-	for (size_t i=2; i < MAX_FI_INT64; i++) {
-		phi_low_memo[i] = phi_low_memo[i-1]+phi_low_memo[i-2];
+	phi = (1+sqrtl(5.L))/2;
+
+	fib_memo.val = (int64_t*)calloc(fib_memo.len, sizeof(int64_t));
+	fib_memo.val[0] = 0;
+	fib_memo.val[1] = 1;
+	for (size_t i=2; i < fib_memo.len; i++) {
+		fib_memo.val[i] = fib_memo.val[i-1]+fib_memo.val[i-2];
+		if (fib_memo.val[i] < fib_memo.val[i-1]) { // Rely on overflow
+			fib_memo.len = i;
+			break;
+		}
 	}
-	libfib_ok = 1;
+	printf("fib_memo.len=%lu\n", fib_memo.len);
+	fib_memo.val = (int64_t*)realloc(fib_memo.val, fib_memo.len*sizeof(int64_t));
+	libfib_ok = true;
 }
 
 
 int64_t
 fibl(int n) {
 	if (n < 0) return -1;
-	if (MAX_FI_INT64-1 < n) return -2;
-	return phi_low_memo[n];
+	if (fib_memo.len-1 < n) return -2;
+	return fib_memo.val[n];
 }
 
 
-double
+long double
+log_fibf(int n) {
+	int64_t f = fibl(n);
+	if (-2 == f) {
+		n -= fib_memo.len-1;
+		return logl(fibl(fib_memo.len-1))+phi*n;
+	}
+	if (f <= 0) {
+		return -1.;
+	}
+	return logl(f);
+}
+
+
+long double
 fibf(int n) {
-	if (n < 0)
+	if (0 == n) return 0;
+	long double rlog = log_fibf(n);
+	if (rlog < 0.)
 #ifdef NAN
 		return NAN;
 #else
-		return -1.;
+		return 0.;
 #endif
-	int64_t f = fibl(n);
-	if (0 <= f) return (double)f; // This cast loses precision starting at n=78
-	n += 1-MAX_FI_INT64;
-	return fibl(MAX_FI_INT64-1)*pow(phi, n);
+	return expl(rlog);
 }

@@ -4,7 +4,7 @@ import sys
 
 libfib = ctypes.CDLL('/usr/local/lib/libfib.so')
 libfib.fibl.restype = ctypes.c_longlong
-libfib.fibf.restype = ctypes.c_double
+libfib.fibf.restype = ctypes.c_longdouble
 
 
 def approx_fib(n):
